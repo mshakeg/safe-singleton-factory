@@ -66,3 +66,7 @@ To submit a transaction after the deployment data is created:
 
 - Set `MNEMONIC` or `PK` in the `.env` file
 - Run `yarn compile:zk`
+
+1. run: `yarn estimate-compile`
+2. run: `yarn submit`
+
