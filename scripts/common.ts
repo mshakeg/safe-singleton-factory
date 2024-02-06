@@ -1,8 +1,11 @@
-import { ethers } from 'ethers';
+import { ethers, Wallet, providers } from 'ethers';
 import * as path from 'path'
 import { promises as filesystem } from 'fs'
 import { CompilerOutputContract } from 'solc'
 import { arrayFromHexString, compileContracts } from './utils';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const signer = "0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37";
 
@@ -36,8 +39,24 @@ async function writeFactoryDeployerTransaction(contract: CompilerOutputContract,
 	const value = 0
 	const data = arrayFromHexString(deploymentBytecode)
 
-	if (!process.env.MNEMONIC) throw Error("MNEMONIC is required")
-	const signer = ethers.Wallet.fromMnemonic(process.env.MNEMONIC!!)
+  const RPC = process.env.RPC;
+  const PK = process.env.PK;
+  const MNEMONIC = process.env.MNEMONIC;
+
+	// if (!MNEMONIC && !PK) throw Error("MNEMONIC | PK is required");
+	if (!PK) throw Error("MNEMONIC | PK is required");
+
+	console.log({
+		RPC,
+		PK: `${PK.substring(0, 5)}...`
+	})
+
+	const provider = new providers.StaticJsonRpcProvider(RPC);
+	const wallet = new Wallet(PK).connect(provider);
+
+	console.log("deployer address", wallet.address);
+
+	const signer = wallet;
 	const signedEncodedTransaction = await signer.signTransaction({
 		nonce, gasPrice, gasLimit, value, data, chainId
 	})
